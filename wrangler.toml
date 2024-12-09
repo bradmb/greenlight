@@ -1,0 +1,31 @@
+name = "greenlight"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "greenlight"
+database_id = "INSERT_D1_ID_HERE"
+
+# KV Namespace for app state
+[[kv_namespaces]]
+binding = "APP_STATE"
+id = "INSERT_KV_ID_HERE"
+preview_id = "INSERT_KV_PREVIEW_ID_HERE"
+
+# Email sending capability
+[[send_email]]
+name = "NOTIFICATIONS"
+
+# Environment variables for JIRA integration and notifications
+[vars]
+JIRA_BASE_URL = "INSERT_JIRA_BASE_URL_HERE"
+ROOT_USERS = "INSERT_ROOT_USERS_HERE"                            # Comma-separated list of root user emails
+APP_NAME = "INSERT_APP_NAME_HERE"                                # Application name for branding
+NOTIFICATION_EMAIL_FROM = "INSERT_NOTIFICATION_EMAIL_FROM_HERE"  # From address for notification emails
+
+# Secrets (to be set in dashboard):
+# - NOTIFICATION_EMAIL_TO
+# - JIRA_API_TOKEN
+# - JIRA_USER_EMAIL
