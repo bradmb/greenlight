@@ -17,20 +17,20 @@ A modern web application for managing software releases, built with Hono.js and 
 ```
 src/
 ├── index.js              # Application entry point and route definitions
-├── routes.js            # Route handlers for all endpoints
-├── auth.js             # Authentication and authorization utilities
-├── database.js         # Database operations and schema management
+├── routes.js             # Route handlers for all endpoints
+├── auth.js               # Authentication and authorization utilities
+├── database.js           # Database operations and schema management
 ├── emailNotifications.js # Email notification functionality
-├── jiraIntegration.js   # JIRA API integration and validation
-└── ui.js               # UI components and rendering functions
+├── jiraIntegration.js    # JIRA API integration and validation
+└── ui.js                 # UI components and rendering functions
 ```
 
 ## Setup Instructions
 
 ### 1. Clone and Install Dependencies
 ```bash
-git clone <repository-url>
-cd <repository-directory>
+git clone https://github.com/bradmb/greenlight
+cd greenlight
 npm install
 ```
 
@@ -99,11 +99,11 @@ JIRA_USER_EMAIL=     # JIRA user email for API access
 JIRA_API_TOKEN=      # JIRA API token for authentication
 
 # Email Notifications
-NOTIFICATION_EMAIL_TO=  # Comma-separated list of notification recipients
+NOTIFICATION_EMAIL_TO=   # Comma-separated list of notification recipients
 NOTIFICATION_EMAIL_FROM= # Email address to send notifications from
 
 # Authentication
-ROOT_USERS=           # Comma-separated list of root user emails
+ROOT_USERS=              # Comma-separated list of root user emails
 ```
 
 ### 5. Configure Email Routing in Cloudflare
