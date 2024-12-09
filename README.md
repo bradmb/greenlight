@@ -1,6 +1,8 @@
 # Greenlight - Release Management Dashboard
 
-A modern web application for managing software releases, built with Hono.js and running on Cloudflare Workers.
+![Greenlight Logo](greenlight.png)
+
+A modern web application for managing software releases, built with Hono.js and running on Cloudflare Workers. Designed to operate behind Cloudflare Zero Trust for secure authentication and access control.
 
 ## Features
 
@@ -11,6 +13,7 @@ A modern web application for managing software releases, built with Hono.js and 
 - 🔐 Role-based access control (root users)
 - 💅 Modern UI with Tailwind CSS and HTMX
 - 🔄 Real-time UI updates without page reloads
+- 🔒 Secure access via Cloudflare Zero Trust authentication
 
 ## Project Structure
 
@@ -27,14 +30,28 @@ src/
 
 ## Setup Instructions
 
-### 1. Clone and Install Dependencies
+### 1. Configure Cloudflare Zero Trust
+1. Set up a Cloudflare Zero Trust account if you haven't already
+2. Create a new application in Zero Trust:
+   - Go to "Access" > "Applications"
+   - Click "Add an application" > "Self-hosted"
+   - Configure your application settings:
+     - Name: Your application name
+     - Session Duration: As needed (e.g., 24 hours)
+     - Domain: Your application's domain
+3. Create an access policy:
+   - Add rules to determine who can access the application
+   - Configure authentication providers (e.g., Google Workspace, Okta)
+4. Note the application domain - you'll need this for deployment
+
+### 2. Clone and Install Dependencies
 ```bash
 git clone https://github.com/bradmb/greenlight
 cd greenlight
 npm install
 ```
 
-### 2. Set Up D1 Database
+### 3. Set Up D1 Database
 1. Create a new D1 database:
 ```bash
 npx wrangler d1 create greenlight
@@ -53,7 +70,7 @@ database_id = "bbf2cf65-3e81-4a04-bab5-21e673e1dbb0"
 
 3. Copy the provided configuration into your `wrangler.toml` file under the `[[d1_databases]]` section.
 
-### 3. Set Up KV Storage
+### 4. Set Up KV Storage
 1. Create the main KV namespace:
 ```bash
 npx wrangler kv:namespace create "app_state"
@@ -90,7 +107,7 @@ id = "468881005e4d48dc8a2a0b9436b10ac3"
 preview_id = "622c246f2dc84eb6b389fa2a850f710d"
 ```
 
-### 4. Configure Environment Variables
+### 5. Configure Environment Variables
 Create a `.dev.vars` file for local development:
 ```env
 # JIRA Integration
@@ -106,7 +123,7 @@ NOTIFICATION_EMAIL_FROM= # Email address to send notifications from
 ROOT_USERS=              # Comma-separated list of root user emails
 ```
 
-### 5. Configure Email Routing in Cloudflare
+### 6. Configure Email Routing in Cloudflare
 1. Go to your Cloudflare dashboard and navigate to "Email" > "Email Routing"
 2. Enable Email Routing if not already enabled
 3. Configure routing rules:
@@ -114,13 +131,13 @@ ROOT_USERS=              # Comma-separated list of root user emails
    - Add destination addresses (matching `NOTIFICATION_EMAIL_TO`) as verified recipients
 4. Test the email routing by sending a test email
 
-### 6. Development
+### 7. Development
 Run the development server:
 ```bash
 npm run dev
 ```
 
-### 7. Deployment
+### 8. Deployment
 Deploy to Cloudflare Workers:
 ```bash
 npx wrangler deploy
