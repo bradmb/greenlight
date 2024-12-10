@@ -425,9 +425,16 @@ export function renderDashboard(userEmail, isRoot, appName) {
 
         function updateTicketFields() {
           const releaseType = document.getElementById('release_type').value;
+          const status = document.querySelector('select[name="status"]').value;
           const ticketsSection = document.getElementById('tickets-section');
           const ticketsLabel = document.getElementById('tickets-label');
           const ticketsHelpText = document.getElementById('tickets-help-text');
+          
+          // Hide tickets section for NO_GO status
+          if (status === 'NO_GO') {
+            ticketsSection.classList.add('hidden');
+            return;
+          }
           
           if (releaseType === 'FULL') {
             ticketsLabel.textContent = 'Tickets to Exclude';
@@ -442,17 +449,21 @@ export function renderDashboard(userEmail, isRoot, appName) {
           }
         }
 
-        // Existing script for handling NO GO explanation
+        // Update form sections when status changes
         document.querySelector('select[name="status"]').addEventListener('change', function() {
           const noGoSection = document.getElementById('no-go-section');
           const explanation = document.querySelector('textarea[name="explanation"]');
+          const ticketsSection = document.getElementById('tickets-section');
           
           if (this.value === 'NO_GO') {
             noGoSection.classList.remove('hidden');
             explanation.required = true;
+            ticketsSection.classList.add('hidden');
           } else {
             noGoSection.classList.add('hidden');
             explanation.required = false;
+            // Re-run the ticket fields update to show appropriate fields
+            updateTicketFields();
           }
         });
       </script>
