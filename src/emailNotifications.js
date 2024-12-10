@@ -13,7 +13,8 @@ export async function sendNotification(env, release, action, userEmail) {
 
   const statusEmoji = release.status === 'GO' ? '✅' : '❌';
   const statusColor = release.status === 'GO' ? '#059669' : '#DC2626'; // emerald-600 and red-600
-  const subject = `${statusEmoji} ${env.APP_NAME} Release ${action}: ${release.status.replace('_', ' ')} for ${release.release_date}`;
+  const typeColor = release.release_type === 'HOTFIX' ? '#D97706' : '#2563EB'; // amber-600 and blue-600
+  const subject = `${statusEmoji} ${env.APP_NAME} Release ${action}: ${release.status.replace('_', ' ')} ${release.release_type} for ${release.release_date}`;
   
   // Parse tickets if they exist
   const tickets = release.excluded_tickets ? release.excluded_tickets.split(',').map((key, index) => ({
@@ -21,9 +22,6 @@ export async function sendNotification(env, release, action, userEmail) {
     summary: release.ticket_summaries ? release.ticket_summaries.split(',')[index] : null,
     url: release.ticket_urls ? release.ticket_urls.split(',')[index] : null
   })) : [];
-
-  // Format the status for display
-  const displayStatus = release.status.replace('_', ' ');
 
   const htmlBody = `
     <!DOCTYPE html>
@@ -92,6 +90,7 @@ export async function sendNotification(env, release, action, userEmail) {
             display: flex;
             align-items: center;
             margin-bottom: 16px;
+            gap: 8px;
           }
           .status-badge {
             display: inline-block;
@@ -101,6 +100,15 @@ export async function sendNotification(env, release, action, userEmail) {
             font-size: 14px;
             color: white;
             background-color: ${statusColor};
+          }
+          .type-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-weight: 500;
+            font-size: 14px;
+            color: white;
+            background-color: ${typeColor};
           }
           .date {
             color: #4B5563;
@@ -179,7 +187,10 @@ export async function sendNotification(env, release, action, userEmail) {
             </div>
             <div class="status-container">
               <span class="status-badge">
-                ${statusEmoji} ${displayStatus}
+                ${statusEmoji} ${release.status.replace('_', ' ')}
+              </span>
+              <span class="type-badge">
+                ${release.release_type}
               </span>
               <span class="date">${new Date(release.release_date).toLocaleDateString()}</span>
             </div>
@@ -202,7 +213,7 @@ export async function sendNotification(env, release, action, userEmail) {
 
           ${tickets.length > 0 ? `
             <div class="section">
-              <div class="section-title">Excluded Tickets</div>
+              <div class="section-title">${release.release_type === 'HOTFIX' ? 'Tickets to Hotfix' : 'Excluded Tickets'}</div>
               ${tickets.map(ticket => `
                 <div class="ticket">
                   <a href="${ticket.url}" class="ticket-key" target="_blank">

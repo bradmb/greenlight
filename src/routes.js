@@ -60,11 +60,11 @@ export async function handleCreateRelease(c) {
     // Initialize database if needed
     await initializeDatabase(db, c.env);
     
-    const { release_date, status, explanation, tickets } = json;
+    const { release_date, status, release_type, explanation, tickets } = json;
     
     // Fetch JIRA details for tickets
     let ticketDetails = [];
-    if (status === 'GO' && tickets && tickets.length > 0) {
+    if (tickets && tickets.length > 0) {
       ticketDetails = await Promise.all(
         tickets.map(async (ticket) => {
           if (c.env.JIRA_API_TOKEN && c.env.JIRA_USER_EMAIL) {
@@ -82,7 +82,7 @@ export async function handleCreateRelease(c) {
     // Create the release with tickets
     const release = await createRelease(
       db,
-      { release_date, status, explanation },
+      { release_date, status, release_type, explanation },
       ticketDetails.filter(Boolean),
       userEmail
     );

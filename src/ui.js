@@ -13,6 +13,7 @@ import { html } from 'hono/html';
 export function renderReleaseRow(release, isRoot) {
   const statusEmoji = release.status === 'GO' ? '✅' : '❌';
   const statusClass = release.status === 'GO' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800';
+  const typeClass = release.release_type === 'HOTFIX' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800';
   
   // Parse tickets if they exist
   const tickets = release.excluded_tickets ? release.excluded_tickets.split(',').map((key, index) => ({
@@ -31,6 +32,9 @@ export function renderReleaseRow(release, isRoot) {
           <span class="${statusClass} px-2.5 py-0.5 rounded-full text-sm font-medium">
             ${statusEmoji} ${release.status.replace('_', ' ')}
           </span>
+          <span class="${typeClass} px-2.5 py-0.5 rounded-full text-sm font-medium">
+            ${release.release_type}
+          </span>
         </div>
 
         <div class="text-sm text-slate-500">
@@ -44,9 +48,11 @@ export function renderReleaseRow(release, isRoot) {
           </div>
         ` : ''}
 
-        ${release.status === 'GO' && tickets.length > 0 ? html`
+        ${tickets.length > 0 ? html`
           <div class="mt-4">
-            <h3 class="font-semibold text-slate-700 mb-2">Excluded Tickets:</h3>
+            <h3 class="font-semibold text-slate-700 mb-2">
+              ${release.release_type === 'HOTFIX' ? 'Tickets to Hotfix:' : 'Excluded Tickets:'}
+            </h3>
             <div class="space-y-2">
               ${tickets.map(ticket => html`
                 <div class="flex items-center gap-2 bg-slate-50 p-3 rounded-lg">
@@ -339,6 +345,7 @@ export function renderDashboard(userEmail, isRoot, appName) {
           const formData = {
             release_date: form.querySelector('[name="release_date"]').value,
             status: form.querySelector('[name="status"]').value,
+            release_type: form.querySelector('[name="release_type"]').value,
             explanation: form.querySelector('[name="explanation"]')?.value || '',
             tickets: tickets
           };
@@ -415,6 +422,39 @@ export function renderDashboard(userEmail, isRoot, appName) {
           const statusSelect = document.querySelector('select[name="status"]');
           updateFormSections(statusSelect.value);
         });
+
+        function updateTicketFields() {
+          const releaseType = document.getElementById('release_type').value;
+          const ticketsSection = document.getElementById('tickets-section');
+          const ticketsLabel = document.getElementById('tickets-label');
+          const ticketsHelpText = document.getElementById('tickets-help-text');
+          
+          if (releaseType === 'FULL') {
+            ticketsLabel.textContent = 'Tickets to Exclude';
+            ticketsHelpText.textContent = 'Enter JIRA ticket IDs for tickets being excluded from this release';
+            ticketsSection.classList.remove('hidden');
+          } else if (releaseType === 'HOTFIX') {
+            ticketsLabel.textContent = 'Tickets to Hotfix';
+            ticketsHelpText.textContent = 'Enter JIRA ticket IDs for tickets being hotfixed in this release';
+            ticketsSection.classList.remove('hidden');
+          } else {
+            ticketsSection.classList.add('hidden');
+          }
+        }
+
+        // Existing script for handling NO GO explanation
+        document.querySelector('select[name="status"]').addEventListener('change', function() {
+          const noGoSection = document.getElementById('no-go-section');
+          const explanation = document.querySelector('textarea[name="explanation"]');
+          
+          if (this.value === 'NO_GO') {
+            noGoSection.classList.remove('hidden');
+            explanation.required = true;
+          } else {
+            noGoSection.classList.add('hidden');
+            explanation.required = false;
+          }
+        });
       </script>
     </body>
     </html>
@@ -434,7 +474,7 @@ function renderReleaseForm() {
         onsubmit="validateAndSubmit(event);"
         class="space-y-6"
       >
-        <div class="grid grid-cols-2 gap-6">
+        <div class="grid grid-cols-3 gap-6">
           <div class="space-y-1.5">
             <label class="block text-sm font-medium text-slate-700">
               Release Date
@@ -449,6 +489,22 @@ function renderReleaseForm() {
             </div>
           </div>
           
+          <div class="space-y-1.5">
+            <label class="block text-sm font-medium text-slate-700">
+              Release Type
+              <span class="text-red-600">*</span>
+            </label>
+            <select name="release_type" 
+              id="release_type"
+              required
+              onchange="updateTicketFields()"
+              class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 focus:border-emerald-500">
+              <option value="">Select a type...</option>
+              <option value="FULL">Full Release</option>
+              <option value="HOTFIX">Hotfix</option>
+            </select>
+          </div>
+
           <div class="space-y-1.5">
             <label class="block text-sm font-medium text-slate-700">
               Status
@@ -478,14 +534,16 @@ function renderReleaseForm() {
         </div>
         
         <div id="tickets-section" class="hidden space-y-1.5">
-          <label class="block text-sm font-medium text-slate-700">Excluded JIRA Tickets</label>
+          <label class="block text-sm font-medium text-slate-700">
+            <span id="tickets-label">JIRA Tickets</span>
+          </label>
           <div class="space-y-3" id="ticket-inputs">
             <div class="flex gap-2">
               <input type="text" name="tickets" placeholder="e.g., JIRA-123"
                 class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 focus:border-emerald-500">
             </div>
           </div>
-          <p class="mt-1 text-sm text-slate-500">Enter JIRA ticket IDs for tickets being excluded from this release</p>
+          <p class="mt-1 text-sm text-slate-500" id="tickets-help-text"></p>
         </div>
         
         <div class="relative">

@@ -7,6 +7,7 @@ A modern web application for managing software releases, built with Hono.js and 
 ## Features
 
 - 🚦 GO/NO-GO release decisions
+- 🎫 Support for both full releases and hotfixes
 - 🎫 JIRA ticket integration with real-time validation
 - 📧 HTML email notifications with ticket details
 - 👥 User authentication via Cloudflare Access
@@ -172,6 +173,7 @@ CREATE TABLE releases (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   release_date DATE NOT NULL,
   status TEXT CHECK(status IN ('GO', 'NO_GO')) NOT NULL,
+  release_type TEXT CHECK(release_type IN ('FULL', 'HOTFIX')) NOT NULL,
   explanation TEXT,
   created_by TEXT NOT NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -209,14 +211,20 @@ CREATE TABLE excluded_tickets (
 
 ### Release Management
 - Create GO/NO-GO release decisions
+- Support two release types:
+  - **Full Releases**: Track tickets being excluded from the release
+  - **Hotfixes**: Track specific tickets being hotfixed
 - Attach JIRA tickets to releases with real-time validation
 - Automatic ticket summary and URL fetching from JIRA
 - Soft delete support for audit trails
 
 ### Email Notifications
 - HTML-formatted emails for better readability
-- Includes release status, date, and creator
-- Lists all excluded tickets with summaries
+- Includes release status, type, date, and creator
+- Lists all tickets with summaries:
+  - Excluded tickets for full releases
+  - Hotfix tickets for hotfixes
+- Color-coded status and type indicators
 - Sent automatically on release creation
 
 ### JIRA Integration
