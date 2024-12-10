@@ -158,23 +158,6 @@ export function renderDashboard(userEmail, isRoot, appName) {
       </div>
       
       <script>
-        // Function to get next Sunday's date in YYYY-MM-DD format
-        function getNextSunday() {
-          const today = new Date();
-          const daysUntilSunday = 7 - today.getDay();
-          const nextSunday = new Date(today);
-          nextSunday.setDate(today.getDate() + daysUntilSunday);
-          return nextSunday.toISOString().split('T')[0];
-        }
-
-        // Set default release date to next Sunday
-        document.addEventListener('DOMContentLoaded', () => {
-          const releaseDateInput = document.querySelector('input[name="release_date"]');
-          if (releaseDateInput) {
-            releaseDateInput.value = getNextSunday();
-          }
-        });
-
         // Function to validate JIRA ticket
         function validateJiraTicket(ticketKey) {
           return fetch('/api/validate-jira/' + encodeURIComponent(ticketKey))
@@ -367,14 +350,35 @@ export function renderDashboard(userEmail, isRoot, appName) {
             const temp = document.createElement('div');
             temp.innerHTML = html;
             
-            // Replace the content and reinitialize HTMX
-            releasesList.innerHTML = temp.querySelector('#releases-list').innerHTML;
+            // Check if the response has the expected structure
+            const newContent = temp.querySelector('#releases-list');
+            if (newContent) {
+              releasesList.innerHTML = newContent.innerHTML;
+            } else {
+              // If not, just use the entire response
+              releasesList.innerHTML = html;
+            }
+            
             htmx.process(releasesList);
             
             // Reset form
             form.reset();
             // Re-initialize form sections
             updateFormSections(form.querySelector('select[name="status"]').value);
+            // Reset ticket inputs
+            const ticketInputs = document.getElementById('ticket-inputs');
+            if (ticketInputs) {
+              ticketInputs.innerHTML = 
+                '<div class="flex gap-2">' +
+                '<input type="text" name="tickets" placeholder="e.g., JIRA-123" ' +
+                'class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 focus:border-emerald-500">' +
+                '</div>';
+              // Re-attach validation to the new ticket input
+              const initialTicketInput = ticketInputs.querySelector('input[name="tickets"]');
+              if (initialTicketInput) {
+                initialTicketInput.addEventListener('blur', () => updateTicketValidation(initialTicketInput));
+              }
+            }
             // Hide loading indicator
             loadingIndicator.style.opacity = '0';
             submitButton.disabled = false;
